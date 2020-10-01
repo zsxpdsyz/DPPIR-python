@@ -34,7 +34,7 @@ class IRCNN(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
         )
-        self.conv7 = nn.Conv2d(64, 64, 3, stride=1, padding=1, dilation=1, bias=False)
+        self.conv7 = nn.Conv2d(64, inchannel, 3, stride=1, padding=1, dilation=1, bias=False)
 
     def forward(self, x):
         x = self.conv1(x)
