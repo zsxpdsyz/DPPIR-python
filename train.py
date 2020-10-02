@@ -17,10 +17,10 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 parse = argparse.ArgumentParser(description='IRCNN Train Parameter')
 parse.add_argument('--train_data_path', default='data/train', type=str, help='path of train data')
 parse.add_argument('--validation_data_path',default='data/Set68', type=str)
-parse.add_argument('--batch_size', default=128, type=int)
+parse.add_argument('--batch_size', default=256, type=int)
 parse.add_argument('--val_batch_size', default=1, type=int)
 parse.add_argument('--epoch', default=150, type=int)
-parse.add_argument('--lr', default=1e-3, type=float)
+parse.add_argument('--lr', default=1e-5, type=float)
 parse.add_argument('--resume', type=str)
 args = parse.parse_args()
 epochs = args.epoch
