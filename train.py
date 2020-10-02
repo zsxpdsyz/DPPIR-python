@@ -10,6 +10,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from skimage.metrics import peak_signal_noise_ratio
 import logging
 import sys
+import numpy as np
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,6 +31,8 @@ train_data_path = args.train_data_path
 validation_data_path = args.validation_data_path
 
 sigma = 50
+total_loss = np.empty(0)
+total_psnr = np.empty(0)
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 logging.info(f'Device is {DEVICE}')
@@ -64,6 +67,7 @@ def test(val_loader, net, criterion, DEVICE):
         psnr_mean = numpy.mean(psnr)
         batch_loss += loss
     return batch_loss / (it + 1), psnr_mean
+
 # Begin training
 for epoch in range(epochs):
     net.train()
@@ -76,9 +80,13 @@ for epoch in range(epochs):
         optimizer.step()
         # if batch_id % 50 == 0:
     print('Train epoch: {}\t Loss:{}'.format(epoch, loss.item()))
+    total_loss = numpy.append(total_loss, format(loss.item(),'0.4f'))
+    np.savez('loss.npz', loss=total_loss, epoch=epoch)
     scheduler.step(epoch)
-    if epoch % 1 == 0:
+    if epoch % 5 == 0:
         logging.info('Begin testing')
         test_loss, psnr = test(validationloader, net, criterion, DEVICE)
         logging.info(f'Dataset mean psnr is {psnr}')
-        torch.save(net.state_dict(), ('./model/'+'sigma'+str(sigma)+'epoch'+str(epoch)+'loss'+str(test_loss.item())+'.pth'))
+        total_psnr = numpy.append(total_psnr, psnr)
+        np.savez('psnr.npz', psnr=total_psnr, epoch=epoch)
+        torch.save(net.state_dict(), ('./model/'+'sigma'+str(sigma)+'epoch'+str(epoch)+'loss'+str(format(test_loss.item(),'0.4f'))+'.pth'))
