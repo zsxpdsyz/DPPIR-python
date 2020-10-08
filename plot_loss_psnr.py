@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+# c = np.load('learning-rate=1e-3/loss.npz')
+# d = np.load('learning-rate=1e-3/psnr.npz')
 c = np.load('loss.npz')
 d = np.load('psnr.npz')
 y = c['loss']
@@ -7,7 +9,7 @@ y = c['loss']
 y = y.astype('float64')
 x = [i for i in range(len(y))]
 y1 = d['psnr']
-x1 = [i for i in range(len(y1))]
+x1 = [5*i for i in range(len(y1))]
 # 画图
 plt.ylabel('Loss')
 plt.xlabel('epoch')
