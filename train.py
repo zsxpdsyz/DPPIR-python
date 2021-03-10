@@ -17,20 +17,26 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 parse = argparse.ArgumentParser(description='IRCNN Train Parameter')
 parse.add_argument('--train_data_path', default='data/train', type=str, help='path of train data')
 parse.add_argument('--validation_data_path',default='data/Set68', type=str)
+parse.add_argument('--save_path',default='model', type=str)
 parse.add_argument('--batch_size', default=512, type=int)
 parse.add_argument('--val_batch_size', default=1, type=int)
 parse.add_argument('--epoch', default=150, type=int)
 parse.add_argument('--lr', default=1e-5, type=float)
+parse.add_argument('--sigma', default=20, type=float, help='The level of noise')
 parse.add_argument('--resume', type=str)
 args = parse.parse_args()
 epochs = args.epoch
 batch_size = args.batch_size
 val_batch_size = args.val_batch_size
+save_path = args.save_path
 lr = args.lr
 train_data_path = args.train_data_path
 validation_data_path = args.validation_data_path
 
-sigma = 50
+sigma = args.sigma
+model_save_path = save_path+'/'+str(sigma)+'/'
+if not os.path.exists(model_save_path):
+    os.mkdir(model_save_path)
 total_loss = np.empty(0)
 total_psnr = np.empty(0)
 
@@ -81,12 +87,13 @@ for epoch in range(epochs):
         # if batch_id % 50 == 0:
     print('Train epoch: {}\t Loss:{}'.format(epoch, loss.item()))
     total_loss = numpy.append(total_loss, format(loss.item(),'0.4f'))
-    np.savez('loss.npz', loss=total_loss, epoch=epoch)
+    np.savez(model_save_path+'loss.npz', loss=total_loss, epoch=epoch)
     scheduler.step(epoch)
     if epoch % 5 == 0:
         logging.info('Begin testing')
         test_loss, psnr = test(validationloader, net, criterion, DEVICE)
         logging.info(f'Dataset mean psnr is {psnr}')
         total_psnr = numpy.append(total_psnr, psnr)
-        np.savez('psnr.npz', psnr=total_psnr, epoch=epoch)
-        torch.save(net.state_dict(), ('./model/'+'sigma'+str(sigma)+'epoch'+str(epoch)+'loss'+str(format(test_loss.item(),'0.4f'))+'.pth'))
+        np.savez(model_save_path+'psnr.npz', psnr=total_psnr, epoch=epoch)
+    if epoch % 20 == 0:
+        torch.save(net.state_dict(), (model_save_path+'sigma'+str(sigma)+'epoch'+str(epoch)+'loss'+str(format(test_loss.item(),'0.4f'))+'.pth'))
