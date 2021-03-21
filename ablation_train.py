@@ -5,7 +5,7 @@ from utils.datasets import TestDataset
 import argparse
 import os
 from torch.utils.data import DataLoader
-from model.IRCNN import IRCNN, Mean_Squared_Error
+from model.IRCNN import IRCNN, Mean_Squared_Error, AblationIRCNN
 from torch.optim.lr_scheduler import MultiStepLR
 from skimage.metrics import peak_signal_noise_ratio
 import logging
@@ -48,7 +48,7 @@ trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 validation_dataset = TestDataset(validation_data_path, sigma)
 validationloader = DataLoader(validation_dataset, batch_size=val_batch_size, shuffle=False)
 
-net = IRCNN(inchannel=1).to(DEVICE)
+net = AblationIRCNN(inchannel=1).to(DEVICE)
 logging.info('build net')
 if args.resume:
     net.load_state_dict(torch.load(args.resume))
@@ -80,7 +80,7 @@ for epoch in range(epochs):
     logging.info(f"Begin training, epoch = {epoch}")
     for batch_id, (batch_y, batch_x) in enumerate(trainloader):
         optimizer.zero_grad()
-        output_x = batch_y.to(DEVICE) - net(batch_y.to(DEVICE)) # batch_size，channel， height，width=128x1x40x40
+        output_x = net(batch_y.to(DEVICE)) # batch_size，channel， height，width=128x1x40x40
         loss = criterion(output_x.to(DEVICE), batch_x.to(DEVICE))
         loss.backward()
         optimizer.step()
