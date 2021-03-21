@@ -5,7 +5,7 @@ from utils.datasets import TestDataset
 import argparse
 import os
 from torch.utils.data import DataLoader
-from model.IRCNN import IRCNN, Mean_Squared_Error
+from model.IRCNN import IRCNN, Mean_Squared_Error, AblationIRCNN
 from torch.optim.lr_scheduler import MultiStepLR
 from skimage.metrics import peak_signal_noise_ratio
 import logging
@@ -34,7 +34,7 @@ train_data_path = args.train_data_path
 validation_data_path = args.validation_data_path
 
 sigma = args.sigma
-model_save_path = save_path+'/'+str(sigma)+'/'
+model_save_path = save_path+'/'+'ablation'+'/'
 if not os.path.exists(model_save_path):
     os.mkdir(model_save_path)
 total_loss = np.empty(0)
@@ -48,7 +48,7 @@ trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 validation_dataset = TestDataset(validation_data_path, sigma)
 validationloader = DataLoader(validation_dataset, batch_size=val_batch_size, shuffle=False)
 
-net = IRCNN(inchannel=1).to(DEVICE)
+net = AblationIRCNN(inchannel=1).to(DEVICE)
 logging.info('build net')
 if args.resume:
     net.load_state_dict(torch.load(args.resume))
@@ -62,7 +62,8 @@ def test(val_loader, net, criterion, DEVICE):
     psnr = []
     for it, (batch_y, batch_x) in enumerate(val_loader):
         with torch.no_grad():
-            output_x = batch_y.to(DEVICE) - net(batch_y.to(DEVICE))
+            #消融实验只需把残差学习给去掉
+            output_x = net(batch_y.to(DEVICE))
             loss = criterion(output_x.to(DEVICE), batch_x.to(DEVICE))
         # 求图像的psnr
         img_x = output_x.cpu().numpy()
@@ -80,7 +81,7 @@ for epoch in range(epochs):
     logging.info(f"Begin training, epoch = {epoch}")
     for batch_id, (batch_y, batch_x) in enumerate(trainloader):
         optimizer.zero_grad()
-        output_x = batch_y.to(DEVICE) - net(batch_y.to(DEVICE)) # batch_size，channel， height，width=128x1x40x40
+        output_x = net(batch_y.to(DEVICE)) # batch_size，channel， height，width=128x1x40x40
         loss = criterion(output_x.to(DEVICE), batch_x.to(DEVICE))
         loss.backward()
         optimizer.step()
