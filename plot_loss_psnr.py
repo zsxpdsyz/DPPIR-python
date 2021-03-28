@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # c = np.load('learning-rate=1e-3/loss.npz')
 # d = np.load('learning-rate=1e-3/psnr.npz')
-save_path = './model/20/'
+save_path = './model/ablation/'
 c = np.load(save_path+'loss.npz')
 d = np.load(save_path+'psnr.npz')
 y = c['loss']

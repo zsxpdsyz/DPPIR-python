@@ -14,15 +14,15 @@ def test(image, noise_image, net, DEVICE):
     GT = image.cpu().numpy()
     batch, _, _, _ = GT.shape
     psnr = peak_signal_noise_ratio(output_x[0, 0, :, :], GT[0, 0, :, :], data_range=1)
-    print(psnr)
+    # print(psnr)
     output_x = np.squeeze(output_x, axis=0)
     output_x = np.squeeze(output_x, axis=0)
     return output_x, psnr
 
 if __name__ == '__main__':
-    test_root = 'data/Set68/'
-    model_path = 'model/sigma50epoch145loss220.7874.pth'
-    save_img_path = 'data/sigma50/'
+    test_root = 'data/Set12/'
+    model_path = 'model/50/sigma50epoch145loss220.7874.pth'
+    save_img_path = 'experiment/Set12_50'
     if not os.path.exists(save_img_path):
         os.mkdir(save_img_path)
     sigma = 50
@@ -48,6 +48,7 @@ if __name__ == '__main__':
         img = image.unsqueeze(0)
         image = img.unsqueeze(0)
         clean_img, psnr = test(image, noise_image, net, DEVICE)
+        print('{} PSNR = {:.2f}, noise image PSNR = {:.2f}'.format(name, psnr))
         # 保存图像
         save_path = os.path.join(save_img_path, name)
         cv2.imwrite(save_path, clean_img*255)
