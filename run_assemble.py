@@ -1,5 +1,5 @@
 import os
-start = 5
+start = 2
 end = 51
 interval = 2
 for sigma in range(start, end, interval):

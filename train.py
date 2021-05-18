@@ -19,6 +19,7 @@ parse.add_argument('--train_data_path', default='data/train', type=str, help='pa
 parse.add_argument('--validation_data_path',default='data/Set68', type=str)
 parse.add_argument('--save_path',default='model', type=str)
 parse.add_argument('--batch_size', default=512, type=int)
+parse.add_argument('--inchannel', default=3, type=int)
 parse.add_argument('--val_batch_size', default=1, type=int)
 parse.add_argument('--epoch', default=150, type=int)
 parse.add_argument('--lr', default=1e-5, type=float)
@@ -32,6 +33,7 @@ save_path = args.save_path
 lr = args.lr
 train_data_path = args.train_data_path
 validation_data_path = args.validation_data_path
+inchannel = args.inchannel
 
 sigma = args.sigma
 model_save_path = save_path+'/'+str(sigma)+'/'
@@ -48,7 +50,7 @@ trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 validation_dataset = TestDataset(validation_data_path, sigma)
 validationloader = DataLoader(validation_dataset, batch_size=val_batch_size, shuffle=False)
 
-net = IRCNN(inchannel=1).to(DEVICE)
+net = IRCNN(inchannel=inchannel).to(DEVICE)
 logging.info('build net')
 if args.resume:
     net.load_state_dict(torch.load(args.resume))
